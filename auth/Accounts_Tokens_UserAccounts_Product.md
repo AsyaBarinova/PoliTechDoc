@@ -2,8 +2,8 @@
 #### Назаначение: Хранение информации об аккаунтах от имени которого работают пользователи
 Комментарий: К одному account может быть привязано несколько логинов (учётных записей людей). У каждого account определяется набор ролей И прав И УЗ, которые определяют:
 <ul>
-<li dir="auto">какие действия доступны (задается через таблицу acc_product_roles);</li>
-<li dir="auto">какие продукты можно "продовать" (задается через таблицу acc_product_roles);</li>
+<li dir="auto">какие действия доступны (задается через таблицу acc_products_roles);</li>
+<li dir="auto">какие продукты можно "продовать" (задается через таблицу acc_products_roles);</li>
 <li dir="auto">какая роль (задается через таблицу acc_account_logins)</li>
 </ul>
 
@@ -56,7 +56,7 @@
 <td style="text-align: center; height: 80px; width: 113.989px;">Родитель acc_accounts.id</td>
 </tr>
 <tr style="height: 36px;">
-<td style="text-align: center; height: 36px; width: 80.125px;">node_type</td>
+<td style="text-align: center; height: 36px; width: 80.125px;">accounts_type</td>
 <td style="text-align: center; height: 36px; width: 44.2273px;">-</td>
 <td style="text-align: center; height: 36px; width: 107.489px;">VARCHAR(10)</td>
 <td style="text-align: center; height: 36px; width: 129.25px;">Да</td>
@@ -93,7 +93,7 @@
 </tbody>
 </table>
 <p></p>
-<p>Справочные значения для поля node_type:</p>
+<p>Справочные значения для поля accounts_type:</p>
 <table border="1" style="border-collapse: collapse; width: 100%; height: 216px;">
 <tbody>
 <tr style="height: 18px;">
@@ -125,7 +125,7 @@
 <td style="width: 50%; height: 18px;"><span>Продавцы. Могут видеть свои договоры и выполнять действия в рамках прав.</span></td>
 </tr>
 <tr style="height: 36px;">
-<td style="width: 50%; height: 36px;"><span>PRODUCT</span></td>
+<td style="width: 50%; height: 36px;"><span>products</span></td>
 <td style="width: 50%; height: 36px;"><span>Продутовый менеджер. Управояет продуктовым конструктором.</span><span><br /></span></td>
 </tr>
 </tbody>
@@ -139,13 +139,13 @@ CREATE TABLE IF NOT EXISTS acc_accounts (
     tid BIGINT NOT NULL REFERENCES acc_tenants(id),
     client_id VARCHAR(255) NOT NULL  REFERENCES acc_clients(clients_id),
     parent_id BIGINT REFERENCES acc_accounts(id),
-    node_type VARCHAR(10) NOT NULL,
+    account_type VARCHAR(10) NOT NULL,
     name VARCHAR(250) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ~~~
-## Таблица: acc_product_roles  
+## Таблица: acc_products_roles  
 #### Назаначение: Содержит привязку аккаунта (портфеля) к продукту. Для каждого продукта задается список прав на действия, которые с ним можно проводить (чтение, расчет, создание договора, пролонгация и т.д.)
 #### Стркутра таблицы 
 <table style="height: 419px; width: 669px;">
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts (
 <td style="text-align: center; height: 36px; width: 156.364px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
 </tr>
 <tr style="height: 72px;">
-<td style="text-align: center; height: 80px; width: 111.75px;">role_product_id</td>
+<td style="text-align: center; height: 80px; width: 111.75px;">role_products_id</td>
 <td style="text-align: center; height: 80px; width: 44.2273px;">FK</td>
 <td style="text-align: center; height: 80px; width: 82.3636px;">BIGINT</td>
 <td style="text-align: center; height: 80px; width: 129.25px;">Да</td>
@@ -204,7 +204,7 @@ CREATE TABLE IF NOT EXISTS acc_accounts (
 <td style="text-align: center; width: 111.75px; height: 18px;">can_read</td>
 <td style="text-align: center; width: 44.2273px; height: 18px;">-</td>
 <td style="text-align: center; width: 82.3636px; height: 18px;">BOOLEAN</td>
-<td style="text-align: center; width: 129.25px; height: 18px;">Нет</td>
+<td style="text-align: center; width: 129.25px; height: 18px;">Да</td>
 <td style="text-align: center; width: 112.682px; height: 18px;">true</td>
 <td style="text-align: center; width: 156.364px; height: 18px;">Разрешение на чтение &nbsp;</td>
 </tr>
@@ -269,10 +269,10 @@ CREATE TABLE IF NOT EXISTS acc_accounts (
 
 #### SQL для создания таблицы:
 ~~~
-CREATE TABLE IF NOT EXISTS acc_product_roles (
+CREATE TABLE IF NOT EXISTS acc_products_roles (
     id BIGINT PRIMARY KEY ,
     tid BIGINT NOT NULL REFERENCES acc_tenants(id),
-    role_product_id BIGINT NOT NULL,
+    role_products_id BIGINT NOT NULL,
     role_account_id BIGINT NOT NULL REFERENCES acc_accounts(id),
     is_deleted BOOLEAN  NOT NULL DEFAULT FALSE,
     can_read BOOLEAN NOT NULL DEFAULT FALSE,
@@ -285,7 +285,7 @@ CREATE TABLE IF NOT EXISTS acc_product_roles (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ~~~
-## Таблица: product 
+## Таблица: products 
 #### Назаначение: Содержит список продуктов 
 #### Стркутра таблицы 
 
@@ -318,7 +318,7 @@ CREATE TABLE IF NOT EXISTS acc_product_roles (
 <td style="text-align: center; height: 36px; width: 156.364px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
 </tr>
 <tr style="height: 72px;">
-<td style="text-align: center; height: 80px; width: 111.989px;">product_code</td>
+<td style="text-align: center; height: 80px; width: 111.989px;">products_code</td>
 <td style="text-align: center; height: 80px; width: 44.3295px;">-</td>
 <td style="text-align: center; height: 80px; width: 82.1818px;">VARCHAR(30)</td>
 <td style="text-align: center; height: 80px; width: 129.534px;">Да</td>
@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS acc_product_roles (
 <td style="text-align: center; height: 80px; width: 156.364px;">Код продукта</td>
 </tr>
 <tr>
-<td style="text-align: center; width: 111.989px;">product_name</td>
+<td style="text-align: center; width: 111.989px;">products_name</td>
 <td style="text-align: center; width: 44.3295px;">-</td>
 <td style="text-align: center; width: 82.1818px;">VARCHAR(250)</td>
 <td style="text-align: center; width: 129.534px;">Да</td>
@@ -338,11 +338,11 @@ CREATE TABLE IF NOT EXISTS acc_product_roles (
 
 #### SQL для создания таблицы:
 ~~~
-CREATE TABLE IF NOT EXISTS acc_product_roles (
+CREATE TABLE IF NOT EXISTS acc_products_roles (
     id BIGINT PRIMARY KEY ,
     tid BIGINT NOT NULL REFERENCES acc_tenants(id),
-    product_code VARCHAR(30) NOT NULL,
-    product_name VARCHAR(250) NOT NULL
+    products_code VARCHAR(30) NOT NULL,
+    products_name VARCHAR(250) NOT NULL
 );
 ~~~
 ## Таблица: acc_account_tokens 
@@ -552,6 +552,7 @@ CREATE TABLE IF NOT EXISTS acc_account_logins (
 POST /tnts/{tenantCode}/clients/{clientId}/accounts
 ```
 #### Назначние метода: Создание аккаунта И наделение правами пользователя И создание токена
+
 <p>Входные параметры&nbsp;</p>
 <p><span>path</span>:</p>
 <table border="1" style="border-collapse: collapse; width: 100%; height: 216px;">
@@ -564,7 +565,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>tenantCode</span></td>
-<td style="width: 12.5%;"><span>clientId</span><span>&nbsp;</span></td>
+<td style="width: 12.5%;"><span>string</span><span>&nbsp;</span></td>
 <td style="width: 12.5%; text-align: center;"><span>Да</span></td>
 <td style="width: 50%; height: 18px;">
 <p>Код тенанта</p>
@@ -573,7 +574,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 </tr>
 <tr>
 <td style="width: 25%;"><span>clientId</span><span>&nbsp;</span><span><br /></span></td>
-<td style="width: 12.5%;"><span>clientId&nbsp;</span></td>
+<td style="width: 12.5%;"><span>string&nbsp;</span></td>
 <td style="width: 12.5%; text-align: center;"><span>Да</span></td>
 <td style="width: 50%;">
 <p>Код клиента (партнера)</p>
@@ -581,9 +582,11 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 </tr>
 </tbody>
 </table>
+
 <p><em>*Комменатрий: значение&nbsp;tenantCode можно получить в таблице&nbsp;acc_tenants поле code, значение clientId в таблице acc_clients значение поля  client_id .</em></p>
+
 <p>body:</p>
-<table border="1" style="border-collapse: collapse; width: 100%; height: 414px;">
+<table border="1" style="border-collapse: collapse; width: 100%; height: 432px;">
 <tbody>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px; text-align: center;"><strong>Значение параметра</strong></td>
@@ -625,7 +628,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <li><span>GROUP</span></li>
 <li><span>ACCOUNT&nbsp;</span></li>
 <li><span>SUB</span></li>
-<li><span>PRODUCT</span></li>
+<li><span>products</span></li>
 </ul>
 </td>
 </tr>
@@ -643,20 +646,12 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
 <td style="width: 50%; height: 18px;"><span>Логин УЗ</span></td>
 </tr>
-<tr>
-<td style="width: 25%;">logins.role</td>
-<td style="width: 12.5%;"><span>string</span></td>
-<td style="width: 12.5%; text-align: center;"><span>Да</span></td>
-<td style="width: 50%;"><span>Роль УЗ</span></td>
-</tr>
 <tr style="height: 18px;">
-<td style="width: 25%; height: 18px;"><span>logins.isDefault</span></td>
+<td style="width: 25%; height: 18px;">logins.role</td>
 <td style="width: 12.5%; height: 18px;"><span>string</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
-<td style="width: 50%; height: 18px;">
-<p><span>Дефолтный портефль&nbsp;</span></p>
-<p><span>true - да, false - нет</span></p>
-</td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Роль УЗ</span></td>
+</tr>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;">tokens</td>
@@ -677,7 +672,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 50%; height: 18px;"><span>Продуктовые роли</span></td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 25%; height: 18px;">products.roleProductId</td>
+<td style="width: 25%; height: 18px;">products.roleproductsId</td>
 <td style="width: 12.5%; height: 18px;"><span>string</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
 <td style="width: 50%; height: 18px;"><span>ИД роли. (Внешний ключ для связи с таблицей products.id)</span></td>
@@ -691,38 +686,38 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canRead</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на чтение &nbsp;</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на чтение .</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на пред. расчет</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на пред. расчет.&nbsp;Если НЕ пришло, то false</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canPolicy</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на итог. расчет</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на итог. расчет.&nbsp;Если НЕ пришло, то false</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>canAddendum</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение.&nbsp; Если НЕ пришло, то false</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canCancel</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на аннулирование договора</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на аннулирование договора.&nbsp;Если НЕ пришло, то false</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canProlongate</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на пролонгацию договора</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на пролонгацию договора. Если НЕ пришло, то false</span></td>
 </tr>
 </tbody>
 </table>
@@ -747,7 +742,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
   ],
   "products": [
     {
-      "roleProductId": "5",
+      "roleproductsId": "5",
       "canRead": true,
       "canQuote": true,
       "canPolicy": true,
@@ -757,48 +752,13 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
       "canCancel": false
       "canProlongate": false
     }
-  ],
-  "path": [
-    {
-      "id": "string",
-      "name": "string"
-    }
   ]
 }
 }
   }
 </pre>
 <p>Выходные параметры:&nbsp;</p>
-<p>Входные параметры&nbsp;</p>
-<p><span>path</span>:</p>
-<table border="1" style="border-collapse: collapse; width: 100%; height: 216px;">
-<tbody>
-<tr style="height: 18px;">
-<td style="width: 25%; height: 18px; text-align: center;"><strong>Значение параметра</strong></td>
-<td style="width: 12.5%; text-align: center;"><strong>Тип</strong></td>
-<td style="width: 12.5%; text-align: center;"><strong>Обязательность</strong></td>
-<td style="width: 50%; height: 18px; text-align: center;"><strong>Описание</strong></td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 25%; height: 18px;"><span>tenantCode</span></td>
-<td style="width: 12.5%;"><span>clientId</span><span>&nbsp;</span></td>
-<td style="width: 12.5%; text-align: center;"><span>Да</span></td>
-<td style="width: 50%; height: 18px;">
-<p>Код тенанта</p>
-<p></p>
-</td>
-</tr>
-<tr>
-<td style="width: 25%;"><span>clientId</span><span>&nbsp;</span><span><br /></span></td>
-<td style="width: 12.5%;"><span>clientId&nbsp;</span></td>
-<td style="width: 12.5%; text-align: center;"><span>Да</span></td>
-<td style="width: 50%;">
-<p>Код клиента (партнера)</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p><em>*Комменатрий: значение&nbsp;tenantCode можно получить в таблице&nbsp;acc_tenants поле code, значение clientId в таблице acc_clients значение поля  client_id .</em></p>
+
 <p>body:</p>
 <table border="1" style="border-collapse: collapse; width: 100%; height: 414px;">
 <tbody>
@@ -842,7 +802,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <li><span>GROUP</span></li>
 <li><span>ACCOUNT&nbsp;</span></li>
 <li><span>SUB</span></li>
-<li><span>PRODUCT</span></li>
+<li><span>products</span></li>
 </ul>
 </td>
 </tr>
@@ -894,7 +854,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 50%; height: 18px;"><span>Продуктовые роли</span></td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 25%; height: 18px;">products.roleProductId</td>
+<td style="width: 25%; height: 18px;">products.roleproductsId</td>
 <td style="width: 12.5%; height: 18px;"><span>string</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
 <td style="width: 50%; height: 18px;"><span>ИД роли. (Внешний ключ для связи с таблицей products.id)</span></td>
@@ -962,7 +922,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
   ],
   "products": [
     {
-      "roleProductId": "5",
+      "roleproductsId": "5",
       "canRead": true,
       "canQuote": true,
       "canPolicy": true,
@@ -971,12 +931,6 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
       "canAddendum": false
       "canCancel": false
       "canProlongate": false
-    }
-  ],
-  "path": [
-    {
-      "id": "string",
-      "name": "string"
     }
   ]
 }
@@ -1004,14 +958,14 @@ where с.client_id = <'clientId из запроса'>
 <p>3. Проверить,что заполнены обязательные параметры и их тип соотв. структуре данных. Если проверка пройдена, то перейти на шаг 4, иначе исключение 4а </p>
 
 <p>4. Проверить параметры, связанные с таблицей acc_accounts:</p> 
-<p>4.1. если пришло parentId, то пророверить, что в таблице acc_accounts есть такой parentId</p>
+<p>4.1. id пророверить, что в таблице acc_accounts НЕТ такого id</p>
 
 ~~~
-select с.parent_id from acc_clients с
-where с.parent_id = <'parentId из запроса'>
+select с.id from acc_clients с
+where с.id = <'id из запроса'>
 ~~~
 
-<p>4.1. Проверить на допустимые значения accountType:</p>
+<p>4.2. Проверить на допустимые значения accountType:</p>
 <ul>
 <li><span>ROOT</span></li>
 <li><span>TENANT</span></li>
@@ -1019,12 +973,252 @@ where с.parent_id = <'parentId из запроса'>
 <li><span>GROUP</span></li>
 <li><span>ACCOUNT&nbsp;</span></li>
 <li><span>SUB</span></li>
-<li><span>PRODUCT</span></li>
+<li><span>products</span></li>
 </ul>
 Если проверка пройдена, то перейти на шаг 5, иначе исключение 5а </p>
 
-<p>5. Проверить параметры, связанные с таблицей acc_product_roles:</p> 
-<p>5.1. role_product_id products.id
-<p>5.2. role_account_id нет 
+<p>5. Проверить параметры, связанные с таблицей acc_products_roles:</p> 
+<p>5.1. проверить, что ИД продукта products.id существует в таблице products поле role_products_id 
 
+~~~
+select p.role_products_id from acc_products_roles с
+where p.role_products_id = <'products.id из запроса'>
+~~~
+
+Если проверка пройдена, то перейти на шаг 6, иначе исключение 6а </p>
+
+<p>6. Проверить параметры, связанные с таблицей acc_account_logins:</p> 
+<p>6.1. Проверить, что user_login(=logins.login) в таблице acc_account_logins уникален в разрезе ид тената (tid) и логина УЗ (user_login) </p> 
+<p>6.2. Проверить, что logins.role из списка: .... (чуть позже приложим) </p> 
+
+Если проверка пройдена, то перейти на шаг 7, иначе исключение 7а </p>
+
+<p>6. Выполнить маппинг и создать записи в таблицах:</p> 
+--- acc_accounts
+<table border="1" style="border-collapse: collapse; width: 80.5243%; height: 162px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px; text-align: center;"><strong>Значение параметра в API</strong></td>
+<td style="width: 23.7363%; text-align: center; height: 18px;"><strong>Значение параметра в таблице</strong></td>
+<td style="width: 50.9998%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">id</td>
+<td style="width: 23.7363%; height: 18px;"><span>=</span>acc_accounts.<span>id</span></td>
+<td style="width: 50.9998%; height: 18px;">ИД аккаунта</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">-</td>
+<td style="width: 23.7363%; height: 18px;">
+<p><span>=</span>acc_accounts.<span>tid</span></p>
+<p><span>по значению параметра {tenantCode} определить ИД тенанта</span></p>
+</td>
+<td style="width: 50.9998%; height: 18px;">ИД тенанта</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>clientId (path параметр)</span></td>
+<td style="width: 23.7363%; height: 18px;"><span>=</span>acc_accounts.<span>client_id</span></td>
+<td style="width: 50.9998%; height: 18px;">Код клиента</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">parentId</td>
+<td style="width: 23.7363%; height: 18px;"><span>=</span>acc_accounts.<span>parent_id</span></td>
+<td style="width: 50.9998%; height: 18px;">
+<p><span>ИД </span><span>родителя acc_accounts.id</span></p>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">accountType</td>
+<td style="width: 23.7363%; height: 18px;">
+<p><span>=</span>acc_accounts.account_type</p>
+</td>
+<td style="width: 50.9998%; height: 18px;">Тип аккаунта</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>name&nbsp;</span></td>
+<td style="width: 23.7363%; height: 18px;"><span>=</span>acc_accounts.<span>name</span></td>
+<td style="width: 50.9998%; height: 18px;">Наименование аккаунта</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">-</td>
+<td style="width: 23.7363%; height: 18px;"><span>=</span>acc_accounts.<span>created_at</span></td>
+<td style="width: 50.9998%; height: 18px;">Дата/время создания&nbsp;аккаунта&nbsp;</td>
+</tr>
+</tbody>
+</table>
+--- acc_account_logins
+<table border="1" style="border-collapse: collapse; width: 99.9065%; height: 334px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px; text-align: center;"><strong>Значение параметра в API</strong></td>
+<td style="width: 24.4627%; text-align: center; height: 18px;"><strong>Значение параметра в таблице</strong></td>
+<td style="width: 50.2734%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">logins</td>
+<td style="width: 24.4627%; height: 18px;"></td>
+<td style="width: 50.2734%; height: 18px;"></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">-</td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.id сгенирировать&nbsp;</span></td>
+<td style="width: 50.2734%; height: 18px;"></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">-</td>
+<td style="height: 18px;">
+<p>=acc_account_logins.tid&nbsp;по значению параметра {tenantCode} определить ИД в таблице&nbsp;acc_tenants</p>
+</td>
+<td style="width: 50.2734%; height: 18px;">ИД тенанта&nbsp;</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">logins.login</td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.user_login</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Логин УЗ</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>clientId (path параметр)</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.client_id взять из&nbsp;clientId (path параметр)</span></td>
+<td style="width: 50.2734%; height: 18px;">ИД клиента</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">-</td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.is_default уст. false</span></td>
+<td style="width: 50.2734%; height: 18px;">
+<p><span>Дефолтный портефль:&nbsp;</span><span>true - да, false - нет</span></p>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">logins.role</td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.role</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Роль УЗ</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">-</td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.created_at уст. тек. дату</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Дата/время создания</span></td>
+</tr>
+</tbody>
+</table>
+---acc_account_tokens
+<table border="1" style="border-collapse: collapse; width: 99.9065%; height: 825px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px; text-align: center;"><strong>Значение параметра в API</strong></td>
+<td style="width: 24.4627%; text-align: center; height: 18px;"><strong>Значение параметра в таблице</strong></td>
+<td style="width: 50.2734%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">tokens</td>
+<td style="width: 24.4627%; height: 18px;"><span>массив</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Список активных токенов на узле. Для ACCOUNT &amp; SUB</span></td>
+</tr>
+<tr>
+<td style="width: 25.1704%;">-</td>
+<td style="width: 24.4627%;"><span><span>=</span></span>acc_account_tokens.<span>id сгенирировать</span></td>
+<td style="width: 50.2734%;"><span>ИД токена</span></td>
+</tr>
+<tr>
+<td style="width: 25.1704%;">-</td>
+<td style="width: 24.4627%;"><span>=acc_account_tokens.tid&nbsp;по значению параметра {tenantCode} определить ИД тенанта</span></td>
+<td style="width: 50.2734%;"><span>ИД тенанта</span></td>
+</tr>
+<tr>
+<td style="width: 25.1704%;"><span>tokens.token</span></td>
+<td style="width: 24.4627%;"><span>=acc_account_tokens.token</span></td>
+<td style="width: 50.2734%;"><span>Токен </span></td>
+</tr>
+<tr>
+<td style="width: 25.1704%;"><span>{clientId}</span></td>
+<td style="width: 24.4627%;"><span>=acc_account_tokens.client_id</span></td>
+<td style="width: 50.2734%;"><span>Код клиента</span></td>
+</tr>
+<tr>
+<td style="width: 25.1704%;">id</td>
+<td style="width: 24.4627%;"><span>=acc_account_tokens.aid</span></td>
+<td style="width: 50.2734%;"><span>Внешний ключ для связи с таблицей acc_accounts.id</span></td>
+</tr>
+<tr>
+<td style="width: 25.1704%;">-</td>
+<td style="width: 24.4627%;"><span>=acc_account_tokens.created_at</span></td>
+<td style="width: 50.2734%;"><span>Дата/время создания токена</span></td>
+</tr>
+</tbody>
+</table>
+--- acc_product_roles
+<table border="1" style="border-collapse: collapse; width: 80.5243%; height: 324px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px; text-align: center;"><strong>Значение параметра в API</strong></td>
+<td style="width: 24.4627%; text-align: center; height: 18px;"><strong>Значение параметра в таблице</strong></td>
+<td style="width: 50.2734%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">products</td>
+<td style="width: 24.4627%; height: 18px;"><span>массив</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Продуктовые роли</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">products.roleProductId</td>
+<td style="width: 24.4627%; height: 18px;"><span><span>=</span></span>acc_product_roles.<span>role_product_id</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>ИД роли. (Внешний ключ для связи с таблицей products.id)</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;">id</td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles.id</td>
+<td style="width: 50.2734%; height: 18px;"><span>ИД Аккаунта. (Внешний ключ для связи с таблицей acc_accounts.id)</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canRead</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles.<span>can_read</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на чтение &nbsp;</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canPolicy</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_policy</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на пред. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canQuote</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_quote</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на итог. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canAddendum</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_addendum</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canCancel</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_cancel</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на аннулирование договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canProlongate</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_prolongate</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на пролонгацию договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>-</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_product_roles.is_deleted&nbsp;уст. false</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Флаг удаления</span></td>
+</tr>
+<tr style="height: 36px;">
+<td style="width: 25.1704%; height: 36px;"><span>-</span></td>
+<td style="width: 24.4627%; height: 36px;"><span>=acc_product_roles.created_at&nbsp;уст. тек. дату</span></td>
+<td style="width: 50.2734%; height: 36px;"><span>Дата/время создания</span></td>
+</tr>
+<tr style="height: 54px;">
+<td style="width: 25.1704%; height: 54px;"><span>-</span></td>
+<td style="width: 24.4627%; height: 54px;"><span>acc_product_roles.tid по значению параметра {tenantCode} определить ИД тенанта</span></td>
+<td style="width: 50.2734%; height: 54px;"><span>ИД тенанта</span></td>
+</tr>
+<tr style="height: 36px;">
+<td style="width: 25.1704%; height: 36px;"><span>-</span></td>
+<td style="width: 24.4627%; height: 36px;"><span>acc_product_roles.id сгенерировать&nbsp;</span></td>
+<td style="width: 50.2734%; height: 36px;"><span>ИД записи</span></td>
+</tr>
+</tbody>
+</table>
+8. Вернуть ответ 
 
