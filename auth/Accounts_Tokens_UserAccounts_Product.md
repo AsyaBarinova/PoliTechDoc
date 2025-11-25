@@ -520,3 +520,504 @@ CREATE TABLE IF NOT EXISTS acc_account_tokens (
 </tr>
 </tbody>
 </table>
+
+#### SQL для создания таблицы:
+~~~
+CREATE TABLE IF NOT EXISTS acc_account_logins (
+    id BIGINT PRIMARY KEY ,
+    tid BIGINT NOT NULL REFERENCES acc_tenants(id),
+    user_login VARCHAR(255) NOT NULL,
+    client_id BIGINT NOT NULL REFERENCES acc_clients(client_code),
+    is_default BOOLEAN DEFAULT FALSE,
+    account_id BIGINT NOT NULL REFERENCES acc_accounts(id),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tid, user_login) REFERENCES acc_logins(tid, user_login),
+    UNIQUE (user_login, account_id)
+);
+~~~
+
+### Логика загрузки данных
+#### Название метода: 
+```
+POST /tnts/{tenantCode}/clients/{clientId}/accounts
+```
+#### Назначние метода: Создание аккаунта И наделение правами пользователя И создание токена
+<p>Входные параметры&nbsp;</p>
+<p><span>path</span>:</p>
+<table border="1" style="border-collapse: collapse; width: 100%; height: 216px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px; text-align: center;"><strong>Значение параметра</strong></td>
+<td style="width: 12.5%; text-align: center;"><strong>Тип</strong></td>
+<td style="width: 12.5%; text-align: center;"><strong>Обязательность</strong></td>
+<td style="width: 50%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>tenantCode</span></td>
+<td style="width: 12.5%;"><span>clientId</span><span>&nbsp;</span></td>
+<td style="width: 12.5%; text-align: center;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;">
+<p>Код тенанта</p>
+<p></p>
+</td>
+</tr>
+<tr>
+<td style="width: 25%;"><span>clientId</span><span>&nbsp;</span><span><br /></span></td>
+<td style="width: 12.5%;"><span>clientId&nbsp;</span></td>
+<td style="width: 12.5%; text-align: center;"><span>Да</span></td>
+<td style="width: 50%;">
+<p>Код клиента (партнера)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><em>*Комменатрий: значение&nbsp;tenantCode можно получить в таблице&nbsp;acc_tenants поле code, значение clientId в таблице acc_clients значение поля  client_id .</em></p>
+<p>body:</p>
+<table border="1" style="border-collapse: collapse; width: 100%; height: 659px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px; text-align: center;"><strong>Значение параметра</strong></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><strong>Тип</strong></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><strong>Обязательность</strong></td>
+<td style="width: 50%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">parentId</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Родитель acc_accounts.id</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>name</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Наименование аккаунта</span></td>
+</tr>
+<tr style="height: 90px;">
+<td style="width: 25%; height: 90px;">
+<p>accountType</p>
+</td>
+<td style="width: 12.5%; height: 90px;"><span>&nbsp;string</span></td>
+<td style="width: 12.5%; text-align: center; height: 90px;"><span>Да</span></td>
+<td style="width: 50%; height: 90px;">
+<p>Тип аккаунта&nbsp;</p>
+<p><span>Enum:</span></p>
+<ul>
+<li><span>ROOT</span></li>
+<li><span>TENANT</span></li>
+<li><span>CLIENT</span></li>
+<li><span>GROUP</span></li>
+<li><span>ACCOUNT&nbsp;</span></li>
+<li><span>SUB</span></li>
+<li><span>PRODUCT</span></li>
+</ul>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">logins</td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Список продающих учеток, имеющих доступ к этому узлу.</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">logins.login</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Логин пользователя</span></td>
+</tr>
+<tr style="height: 191px;">
+<td style="width: 25%; height: 191px;"><span>admins</span></td>
+<td style="width: 12.5%; height: 191px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 191px;"><span>Нет</span></td>
+<td style="width: 50%; height: 191px;"><span><span>Список активных учеток, имеющих Админские роли для этой группы. Применимо только для</span></span>
+<ul>
+<li><span>TENANT</span></li>
+<li>CLIENT</li>
+<li>GROUP</li>
+</ul>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>admins.login</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Логин</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>logins.isDefault</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;">
+<p><span>Дефолтный портефль&nbsp;</span></p>
+<p><span>true - да, false - нет</span></p>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">tokens</td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Список активных токенов на узле. Для ACCOUNT &amp; SUB</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>tokens.token</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Токен</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">products</td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Продуктовые роли</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">products.roleProductId</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>ИД роли. (Внешний ключ для связи с таблицей products.id)</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">products.roleAccauntId</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>ИД Аккаунта. (Внешний ключ для связи с таблицей acc_accounts.id)</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canRead</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на чтение &nbsp;</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на пред. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canPolicy</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на итог. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>canAddendum</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canCancel</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на аннулирование договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canProlongate</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на пролонгацию договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>path</span><span><br /></span></td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да?</span></td>
+<td style="width: 50%; height: 18px;"><span>для UI, путь от узла до корня</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>path.id</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да?</span></td>
+<td style="width: 50%; height: 18px;"><span>ИД</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>path.name</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да?</span></td>
+<td style="width: 50%; height: 18px;"><span>Наименования</span></td>
+</tr>
+</tbody>
+</table>
+
+<p>Пример запроса:&nbsp;</p>
+<p>POST /tnts/VSK/clients/SRAVNI/accounts</p>
+
+<pre> {
+  "parentId": "3",
+  "name": "Сравни",
+  "accountType": "ACCOUNT",
+  "logins": [
+    {
+      "login": "sravni@mail.ru"
+    }
+  ],
+  "admins": [
+    {
+      "login": "mainsravni@mail.ru"
+    }
+  ],
+  "tokens": [
+    {
+      "token": "SR"
+    }
+  ],
+  "products": [
+    {
+      "roleProductId": "5",
+      "roleAccountId": "2",
+      "canRead": true,
+      "canQuote": true,
+      "canPolicy": true,
+      "canAddendum": true,
+      "canCancel": true
+      "canAddendum": false
+      "canCancel": false
+      "canProlongate": false
+    }
+  ],
+  "path": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ]
+}
+}
+  }
+</pre>
+<p>Выходные параметры:&nbsp;</p>
+<table border="1" style="border-collapse: collapse; width: 100%; height: 659px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px; text-align: center;"><strong>Значение параметра</strong></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><strong>Тип</strong></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><strong>Обязательность</strong></td>
+<td style="width: 50%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">id</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;">Ид&nbsp;</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">parentId</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Родитель acc_accounts.id</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>name</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Наименование аккаунта</span></td>
+</tr>
+<tr style="height: 90px;">
+<td style="width: 25%; height: 90px;">
+<p>accountType</p>
+</td>
+<td style="width: 12.5%; height: 90px;"><span>&nbsp;string</span></td>
+<td style="width: 12.5%; text-align: center; height: 90px;"><span>Да</span></td>
+<td style="width: 50%; height: 90px;">
+<p>Тип аккаунта&nbsp;</p>
+<p><span>Enum:</span></p>
+<ul>
+<li><span>ROOT</span></li>
+<li><span>TENANT</span></li>
+<li><span>CLIENT</span></li>
+<li><span>GROUP</span></li>
+<li><span>ACCOUNT&nbsp;</span></li>
+<li><span>SUB</span></li>
+<li><span>PRODUCT</span></li>
+</ul>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">logins</td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Список продающих учеток, имеющих доступ к этому узлу.</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">logins.login</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Логин пользователя</span></td>
+</tr>
+<tr style="height: 191px;">
+<td style="width: 25%; height: 191px;"><span>admins</span></td>
+<td style="width: 12.5%; height: 191px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 191px;"><span>Нет</span></td>
+<td style="width: 50%; height: 191px;"><span><span>Список активных учеток, имеющих Админские роли для этой группы. Применимо только для</span></span>
+<ul>
+<li><span>TENANT</span></li>
+<li>CLIENT</li>
+<li>GROUP</li>
+</ul>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>admins.login</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Логин</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>logins.isDefault</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;">
+<p><span>Дефолтный портефль&nbsp;</span></p>
+<p><span>true - да, false - нет</span></p>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">tokens</td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Список активных токенов на узле. Для ACCOUNT &amp; SUB</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>tokens.token</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Токен</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">products</td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Продуктовые роли</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">products.roleProductId</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>ИД роли. (Внешний ключ для связи с таблицей products.id)</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">products.roleAccauntId</td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>ИД Аккаунта. (Внешний ключ для связи с таблицей acc_accounts.id)</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canRead</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на чтение &nbsp;</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на пред. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canPolicy</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на итог. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>canAddendum</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canCancel</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на аннулирование договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canProlongate</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на пролонгацию договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>path</span><span><br /></span></td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да?</span></td>
+<td style="width: 50%; height: 18px;"><span>для UI, путь от узла до корня</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>path.id</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да?</span></td>
+<td style="width: 50%; height: 18px;"><span>ИД</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>path.name</span></td>
+<td style="width: 12.5%; height: 18px;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да?</span></td>
+<td style="width: 50%; height: 18px;"><span>Наименования</span></td>
+</tr>
+</tbody>
+</table>
+Пример ответа:
+<pre> {
+  "parentId": "5",
+  "parentId": "3",
+  "name": "Сравни",
+  "accountType": "ACCOUNT",
+  "logins": [
+    {
+      "login": "sravni@mail.ru"
+    }
+  ],
+  "admins": [
+    {
+      "login": "mainsravni@mail.ru"
+    }
+  ],
+  "tokens": [
+    {
+      "token": "SR"
+    }
+  ],
+  "products": [
+    {
+      "roleProductId": "5",
+      "roleAccountId": "2",
+      "canRead": true,
+      "canQuote": true,
+      "canPolicy": true,
+      "canAddendum": true,
+      "canCancel": true
+      "canAddendum": false
+      "canCancel": false
+      "canProlongate": false
+    }
+  ],
+  "path": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ]
+}
+}
+  }
+</pre>
+
+### Название сценария: Создание аккаунта И наделение правами пользователя И создание токена 
+#### Триггер: Вызван метод POST /tnts/{tenantCode}/clients/{clientId}/accounts
+#### Сценарий :
+<p>1. Проверить по code наличие тенанта в таблице acc_tenants. Если совпадение найдено, то перейти на шаг 2, иначе исключение 2а </p>
+~~~
+select t.code from acc_tenants t 
+where t.code = <'tenantCode из запроса'>
+~~~
+<p>2. Проверить по client_id наличие клиента в таблице acc_clients. Если совпадение найдено, то перейти на шаг 3, иначе исключение 3а </p>
+~~~
+select с.client_id from acc_clients с
+where с.client_id = <'clientId из запроса'>
+~~~
+<p>3. Проверить,что заполнены обязательные параметры и их тип соотв. структуре данных. Если проверка пройдена, то перейти на шаг 4, иначе исключение 4а </p>
+<p>3. Проверить,что заполнены обязательные параметры и их тип соотв. структуре данных. Если проверка пройдена, то перейти на шаг 4, иначе исключение 4а </p>
+
+
