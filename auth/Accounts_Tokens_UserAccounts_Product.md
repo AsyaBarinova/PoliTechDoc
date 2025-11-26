@@ -62,7 +62,7 @@
 <td style="text-align: center; height: 36px; width: 129.25px;">Да</td>
 <td style="text-align: center; width: 161.557px; height: 36px;"><span>ACCOUNT</span></td>
 <td style="text-align: center; height: 36px; width: 113.989px;">
-<p>Разрешения</p>
+<p>Тип узла</p>
 <p></p>
 </td>
 </tr>
@@ -102,31 +102,27 @@
 </tr>
 <tr style="height: 18px;">
 <td style="width: 50%; height: 18px;"><span>ROOT</span></td>
-<td style="width: 50%; height: 18px;"><span>Админ платформы. Может создавать новые разделы (tenant).</span></td>
+<td style="width: 50%; height: 18px;"><span>Может создавать новые разделы (tenant).</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 50%; height: 18px;"><span>TENANT</span></td>
-<td style="width: 50%; height: 18px;"><span>Админ раздела. Может создавать учетки клиентов и управлять настройкой ресурсов клиентов.</span></td>
+<td style="width: 50%; height: 18px;"><span>Может создавать учетки клиентов и управлять настройкой ресурсов клиентов.</span></td>
 </tr>
 <tr style="height: 72px;">
 <td style="width: 50%; height: 72px;"><span>CLIENT</span></td>
-<td style="width: 50%; height: 72px;"><span>Админ группы, продуктовый менеджер и т.д. Может управлять учетками и правами в рамках своих групп</span></td>
+<td style="width: 50%; height: 72px;"><span>Может управлять учетками и правами в рамках своих групп</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 50%; height: 18px;"><span>GROUP</span></td>
-<td style="width: 50%; height: 18px;"><span>Админ группы, продуктовый менеджер и т.д. Может управлять учетками и правами в рамках своих групп</span></td>
+<td style="width: 50%; height: 18px;"><span>Может управлять учетками и правами в рамках своих групп</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 50%; height: 18px;"><span>ACCOUNT&nbsp;</span><span><br /></span></td>
-<td style="width: 50%; height: 18px;"><span>Продавцы. Могут видеть свои договоры и выполнять действия в рамках прав.</span></td>
+<td style="width: 50%; height: 18px;"><span>Могут видеть свои договоры и выполнять действия в рамках прав.</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 50%; height: 18px;"><span>SUB</span><span><br /></span></td>
 <td style="width: 50%; height: 18px;"><span>Продавцы. Могут видеть свои договоры и выполнять действия в рамках прав.</span></td>
-</tr>
-<tr style="height: 36px;">
-<td style="width: 50%; height: 36px;"><span>products</span></td>
-<td style="width: 50%; height: 36px;"><span>Продутовый менеджер. Управояет продуктовым конструктором.</span><span><br /></span></td>
 </tr>
 </tbody>
 </table>
@@ -207,6 +203,15 @@ CREATE TABLE IF NOT EXISTS acc_accounts (
 <td style="text-align: center; width: 129.25px; height: 18px;">Да</td>
 <td style="text-align: center; width: 112.682px; height: 18px;">true</td>
 <td style="text-align: center; width: 156.364px; height: 18px;">Разрешение на чтение &nbsp;</td>
+
+<tr style="height: 18px;">
+<td style="text-align: center; width: 111.75px; height: 18px;">can_printform</td>
+<td style="text-align: center; width: 44.2273px; height: 18px;">-</td>
+<td style="text-align: center; width: 82.3636px; height: 18px;">BOOLEAN</td>
+<td style="text-align: center; width: 129.25px; height: 18px;">Да</td>
+<td style="text-align: center; width: 112.682px; height: 18px;">true</td>
+<td style="text-align: center; width: 156.364px; height: 18px;">Разрешение на получение ПФ &nbsp;</td>
+
 </tr>
 <tr style="height: 36px;">
 <td style="text-align: center; height: 36px; width: 111.75px;">can_quote</td>
@@ -276,6 +281,7 @@ CREATE TABLE IF NOT EXISTS acc_products_roles (
     role_account_id BIGINT NOT NULL REFERENCES acc_accounts(id),
     is_deleted BOOLEAN  NOT NULL DEFAULT FALSE,
     can_read BOOLEAN NOT NULL DEFAULT FALSE,
+    can_printform BOOLEAN  NOT NULL DEFAULT FALSE,
     can_quote BOOLEAN  NOT NULL DEFAULT FALSE,
     can_policy BOOLEAN  NOT NULL DEFAULT FALSE,
     can_addendum BOOLEAN  NOT NULL DEFAULT FALSE,
@@ -285,66 +291,90 @@ CREATE TABLE IF NOT EXISTS acc_products_roles (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ~~~
-## Таблица: products 
+## Таблица: pt_products 
 #### Назаначение: Содержит список продуктов 
 #### Стркутра таблицы 
 
-<table style="height: 401px; width: 669px;">
+<table style="height: 331px; width: 634px;">
 <thead>
 <tr style="height: 36px;">
-<th style="text-align: center; height: 36px; width: 111.989px;">Название поля</th>
-<th style="text-align: center; height: 36px; width: 44.3295px;">Ключ</th>
-<th style="text-align: center; height: 36px; width: 82.1818px;">Тип поля</th>
-<th style="text-align: center; height: 36px; width: 129.534px;">Обязательность</th>
-<th style="text-align: center; width: 112.239px; height: 36px;">Пример</th>
-<th style="text-align: center; height: 36px; width: 156.364px;">Описание</th>
+<th style="text-align: center; height: 36px; width: 118px;">Название поля</th>
+<th style="text-align: center; height: 36px; width: 44px;">Ключ</th>
+<th style="text-align: center; height: 36px; width: 107px;">Тип поля</th>
+<th style="text-align: center; height: 36px; width: 129px;">Обязательность</th>
+<th style="text-align: center; width: 102px; height: 36px;">Пример</th>
+<th style="text-align: center; height: 36px; width: 134px;">Описание</th>
 </tr>
 </thead>
 <tbody>
 <tr style="height: 36px;">
-<td style="text-align: center; height: 35px; width: 111.989px;">id</td>
-<td style="text-align: center; height: 35px; width: 44.3295px;">PK</td>
-<td style="text-align: center; height: 35px; width: 82.1818px;">BIGINT</td>
-<td style="text-align: center; height: 35px; width: 129.534px;">Да</td>
-<td style="text-align: center; width: 112.239px; height: 35px;">4</td>
-<td style="text-align: center; height: 35px; width: 156.364px;">Идентификатор продукта</td>
+<td style="text-align: center; height: 35px; width: 118px;">id</td>
+<td style="text-align: center; height: 35px; width: 44px;">PK</td>
+<td style="text-align: center; height: 35px; width: 107px;">INTEGER</td>
+<td style="text-align: center; height: 35px; width: 129px;">Да</td>
+<td style="text-align: center; width: 102px; height: 35px;">4</td>
+<td style="text-align: center; height: 35px; width: 134px;">Идентификатор продукта</td>
 </tr>
 <tr style="height: 36px;">
-<td style="text-align: center; height: 36px; width: 111.989px;">tid</td>
-<td style="text-align: center; height: 36px; width: 44.3295px;">FK</td>
-<td style="text-align: center; height: 36px; width: 82.1818px;">BIGINT</td>
-<td style="text-align: center; height: 36px; width: 129.534px;">Да</td>
-<td style="text-align: center; width: 112.239px; height: 36px;">1</td>
-<td style="text-align: center; height: 36px; width: 156.364px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
+<td style="text-align: center; height: 36px; width: 118px;">tid</td>
+<td style="text-align: center; height: 36px; width: 44px;">FK</td>
+<td style="text-align: center; height: 36px; width: 107px;">BIGINT</td>
+<td style="text-align: center; height: 36px; width: 129px;">Да</td>
+<td style="text-align: center; width: 102px; height: 36px;">1</td>
+<td style="text-align: center; height: 36px; width: 134px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
 </tr>
 <tr style="height: 72px;">
-<td style="text-align: center; height: 80px; width: 111.989px;">products_code</td>
-<td style="text-align: center; height: 80px; width: 44.3295px;">-</td>
-<td style="text-align: center; height: 80px; width: 82.1818px;">VARCHAR(30)</td>
-<td style="text-align: center; height: 80px; width: 129.534px;">Да</td>
-<td style="text-align: center; width: 112.239px; height: 80px;"><span>Acclient </span></td>
-<td style="text-align: center; height: 80px; width: 156.364px;">Код продукта</td>
+<td style="text-align: center; height: 80px; width: 118px;">code</td>
+<td style="text-align: center; height: 80px; width: 44px;">-</td>
+<td style="text-align: center; height: 80px; width: 107px;">VARCHAR(30)</td>
+<td style="text-align: center; height: 80px; width: 129px;">Да</td>
+<td style="text-align: center; width: 102px; height: 80px;"><span>Acclient </span></td>
+<td style="text-align: center; height: 80px; width: 134px;">Код продукта</td>
 </tr>
-<tr>
-<td style="text-align: center; width: 111.989px;">products_name</td>
-<td style="text-align: center; width: 44.3295px;">-</td>
-<td style="text-align: center; width: 82.1818px;">VARCHAR(250)</td>
-<td style="text-align: center; width: 129.534px;">Да</td>
-<td style="text-align: center; width: 112.239px;">Страхование от несчастных случаев (НС)</td>
-<td style="text-align: center; width: 156.364px;">Наименование продукта</td>
+<tr style="height: 72px;">
+<td style="text-align: center; width: 118px; height: 72px;">name</td>
+<td style="text-align: center; width: 44px; height: 72px;">-</td>
+<td style="text-align: center; width: 107px; height: 72px;">VARCHAR(250)</td>
+<td style="text-align: center; width: 129px; height: 72px;">Да</td>
+<td style="text-align: center; width: 102px; height: 72px;">Страхование от несчастных случаев (НС)</td>
+<td style="text-align: center; width: 134px; height: 72px;">Наименование продукта</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 118px; height: 18px;">lob</td>
+<td style="text-align: center; width: 44px; height: 18px;">-</td>
+<td style="text-align: center; width: 107px; height: 18px;">VARCHAR(30)</td>
+<td style="text-align: center; width: 129px; height: 18px;">Да</td>
+<td style="text-align: center; width: 102px; height: 18px;">Страхование жизни</td>
+<td style="text-align: center; width: 134px; height: 18px;">Линия бизнеса</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 118px; height: 18px;">prod_version_no</td>
+<td style="text-align: center; width: 44px; height: 18px;">-</td>
+<td style="text-align: center; width: 107px; height: 18px;">INTEGER</td>
+<td style="text-align: center; width: 129px; height: 18px;">Нет</td>
+<td style="text-align: center; width: 102px; height: 18px;">1</td>
+<td style="text-align: center; width: 134px; height: 18px;">Версия продукта прод</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 118px; height: 18px;">dev_version_no</td>
+<td style="text-align: center; width: 44px; height: 18px;">-</td>
+<td style="text-align: center; width: 107px; height: 18px;">INTEGER</td>
+<td style="text-align: center; width: 129px; height: 18px;">Нет</td>
+<td style="text-align: center; width: 102px; height: 18px;">1</td>
+<td style="text-align: center; width: 134px; height: 18px;">Версия продукта dev</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 118px; height: 18px;">isDeleted</td>
+<td style="text-align: center; width: 44px; height: 18px;">-</td>
+<td style="text-align: center; width: 107px; height: 18px;">BOOLEAN</td>
+<td style="text-align: center; width: 129px; height: 18px;">Да</td>
+<td style="text-align: center; width: 102px; height: 18px;">false</td>
+<td style="text-align: center; width: 134px; height: 18px;">Флаг удаления. true - да, false - нет.</td>
 </tr>
 </tbody>
 </table>
 
-#### SQL для создания таблицы:
-~~~
-CREATE TABLE IF NOT EXISTS acc_products_roles (
-    id BIGINT PRIMARY KEY ,
-    tid BIGINT NOT NULL REFERENCES acc_tenants(id),
-    products_code VARCHAR(30) NOT NULL,
-    products_name VARCHAR(250) NOT NULL
-);
-~~~
+
 ## Таблица: acc_account_tokens 
 #### Назаначение:<p><span>Доступ к портфелю по коду доступа. Иногда продажи проводятся на публичных сайтах, но есть потребность привязать продажи к разным портфелям. Тогда можно сгенерить разные коды, раздать их продавцам, чтобы они вводили их при продаже и настроить этот код на определенный портфель</span></p> 
 #### Стркутра таблицы 
@@ -439,6 +469,7 @@ CREATE TABLE IF NOT EXISTS acc_account_tokens (
 Если в токене не указано, к какому портфелю нужен доступ, то берется дефолтный портфель с isDefault = true
 Такой признак можно проставить только у одного портфеля в рамках client_id 
 #### Стркутра таблицы 
+
 <table style="height: 295px; width: 669px;">
 <thead>
 <tr style="height: 36px;">
@@ -495,7 +526,7 @@ CREATE TABLE IF NOT EXISTS acc_account_tokens (
 </td>
 </tr>
 <tr style="height: 18px;">
-<td style="text-align: center; width: 80.125px; height: 18px;">account_id</td>
+<td style="text-align: center; width: 80.125px; height: 18px;">aid</td>
 <td style="text-align: center; width: 44.2273px; height: 18px;">FK</td>
 <td style="text-align: center; width: 107.489px; height: 18px;">BIGINT</td>
 <td style="text-align: center; width: 129.25px; height: 18px;">Да</td>
@@ -583,7 +614,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 </tbody>
 </table>
 
-<p><em>*Комменатрий: значение&nbsp;tenantCode можно получить в таблице&nbsp;acc_tenants поле code, значение clientId в таблице acc_clients значение поля  client_id .</em></p>
+<p><em>*Комменатрий: значение&nbsp;tenantCode можно получить в таблице&nbsp;acc_tenants поле code, значение clientId в таблице acc_clients значение поля  id .</em></p>
 
 <p>body:</p>
 <table border="1" style="border-collapse: collapse; width: 100%; height: 432px;">
@@ -687,7 +718,14 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 25%; height: 18px;"><span>products.canRead</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на чтение .</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на чтение. Если НЕ пришло, то false</span></td>
+</tr>
+    </tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canPrintform</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на получение ПФ. Если НЕ пришло, то false</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
@@ -702,7 +740,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 50%; height: 18px;"><span>Разрешение на итог. расчет.&nbsp;Если НЕ пришло, то false</span></td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 25%; height: 18px;"><span>canAddendum</span></td>
+<td style="width: 25%; height: 18px;"><span>products.canAddendum</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
 <td style="width: 50%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение.&nbsp; Если НЕ пришло, то false</span></td>
@@ -723,7 +761,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 </table>
 
 <p>Пример запроса:&nbsp;</p>
-<p>POST /tnts/VSK/clients/SRAVNI/accounts</p>
+<p>POST /tnts/VSK/clients/1/accounts</p>
 
 <pre> {
   "parentId": "3",
@@ -743,13 +781,13 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
   "products": [
     {
       "roleproductsId": "5",
+      "roleproductsId": "5",
       "canRead": true,
+      "canPrintform": true,
       "canQuote": true,
       "canPolicy": true,
       "canAddendum": true,
-      "canCancel": true
-      "canAddendum": false
-      "canCancel": false
+      "canCancel": false,
       "canProlongate": false
     }
   ]
@@ -872,6 +910,12 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 50%; height: 18px;"><span>Разрешение на чтение &nbsp;</span></td>
 </tr>
 <tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canPrintform</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на получение ПФ. Если НЕ пришло, то false</span></td>
+</tr>
+<tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
@@ -884,7 +928,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 50%; height: 18px;"><span>Разрешение на итог. расчет</span></td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 25%; height: 18px;"><span>canAddendum</span></td>
+<td style="width: 25%; height: 18px;"><span>products.canAddendum</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
 <td style="width: 50%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение</span></td>
@@ -924,12 +968,11 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
     {
       "roleproductsId": "5",
       "canRead": true,
+      "canPrintform": true,
       "canQuote": true,
       "canPolicy": true,
       "canAddendum": true,
-      "canCancel": true
-      "canAddendum": false
-      "canCancel": false
+      "canCancel": false,
       "canProlongate": false
     }
   ]
@@ -973,7 +1016,6 @@ where с.id = <'id из запроса'>
 <li><span>GROUP</span></li>
 <li><span>ACCOUNT&nbsp;</span></li>
 <li><span>SUB</span></li>
-<li><span>products</span></li>
 </ul>
 Если проверка пройдена, то перейти на шаг 5, иначе исключение 5а </p>
 
