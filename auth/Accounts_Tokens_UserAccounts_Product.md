@@ -659,7 +659,6 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <li><span>GROUP</span></li>
 <li><span>ACCOUNT&nbsp;</span></li>
 <li><span>SUB</span></li>
-<li><span>products</span></li>
 </ul>
 </td>
 </tr>
@@ -991,22 +990,50 @@ select t.code from acc_tenants t
 where t.code = <'tenantCode из запроса'>
 ~~~
     
-<p>2. Проверить по client_id наличие клиента в таблице acc_clients. Если совпадение найдено, то перейти на шаг 3, иначе исключение 3а </p>
+<p>2. Проверить по id наличие клиента в таблице acc_clients. Если совпадение найдено, то перейти на шаг 3, иначе исключение 3а </p>
 
 ~~~
-select с.client_id from acc_clients с
-where с.client_id = <'clientId из запроса'>
+select с.id from acc_clients с
+where с.id = <'clientId из запроса'>
 ~~~
 
 <p>3. Проверить,что заполнены обязательные параметры и их тип соотв. структуре данных. Если проверка пройдена, то перейти на шаг 4, иначе исключение 4а </p>
 
 <p>4. Проверить параметры, связанные с таблицей acc_accounts:</p> 
-<p>4.1. id пророверить, что в таблице acc_accounts НЕТ такого id</p>
+<p>4.1. Проверить наличие в таблице acc_accounts поля id. Если записи НЕТ, то создать, если запись есть, то провести проверку и не создавать</p>
+
+<p><em>Есть два варинта: создают первый АКК и УЗ к нему или к созданному АКК добовляют УЗ. Если к созданному АКК, то проверить, что тенат и клиент совпадают ИНАЧЕ ошибка исключение 5а.</em></p>
+
+
+Вариант 1: Аккаунт НЕ создан, то идем далее по шагам (4.2)
 
 ~~~
-select с.id from acc_clients с
-where с.id = <'id из запроса'>
+select а.id from acc_accounts а
+where а.id = <'id из запроса'>
 ~~~
+
+
+Вариант 2: Аккаунт создан и валиден в разрезе тенанта, клиента, аккаунта. Для этого сделать проверку, что ИД аккаунта соотв. тенанту и ид клиента из path параметров 
+
+~~~
+SELECT
+    a.tid, --- ид тенанта в таб. acc_accounts
+    a.id, --- ид аккаунта в таб. acc_accounts
+    t.code, --- ид кода тенанта в таб. acc_tenants
+    c.client_id --- ид клиента в таб. acc_clients
+FROM
+    acc_accounts a
+JOIN
+    acc_tenants t ON t.id = a.tid
+JOIN
+    acc_clients c ON c.client_id = a.client_id
+WHERE
+    t.code = <'tenantCode из запроса'>
+    AND c.id = <'clientId из запроса'>
+    AND a.id = <'id из запроса'> ;
+~~~
+
+Искючение : Аккаунт создан, но НЕ валиден в разрезе тенанта, клиента, аккаунта. 
 
 <p>4.2. Проверить на допустимые значения accountType:</p>
 <ul>
@@ -1019,12 +1046,12 @@ where с.id = <'id из запроса'>
 </ul>
 Если проверка пройдена, то перейти на шаг 5, иначе исключение 5а </p>
 
-<p>5. Проверить параметры, связанные с таблицей acc_products_roles:</p> 
-<p>5.1. проверить, что ИД продукта products.id существует в таблице products поле role_products_id 
+<p>5. Проверить параметры, связанные с таблицей pt_products:</p> 
+<p>5.1. проверить, что ИД продукта products.id существует в таблице pt_products поле id 
 
 ~~~
-select p.role_products_id from acc_products_roles с
-where p.role_products_id = <'products.id из запроса'>
+select p.id d from pt_products p
+where p.id = <'products.id из запроса'>
 ~~~
 
 Если проверка пройдена, то перейти на шаг 6, иначе исключение 6а </p>
@@ -1038,13 +1065,16 @@ select l.logins from acc_logins l
 where  l.logins = <'logins.user_login из запроса'>
 ~~~
 
-<p>6.3. Проверить, что logins.role из списка: .... (чуть позже приложим) </p> 
+<p>6.3. Проверить, что logins.role из списка: SYS_ADMIN ИЛИ SALES ИЛИ TNT_ADMIN ИЛИ GROUP_ADMIN </p> 
 
 Если проверка пройдена, то перейти на шаг 7, иначе исключение 7а </p>
 
 <p>6. Выполнить маппинг и создать записи в таблицах:</p> 
 --- acc_accounts
-<table border="1" style="border-collapse: collapse; width: 80.5243%; height: 162px;">
+
+##### Искючение для таблицы acc_accounts: если АКК был ранее создан, то НЕ записываем в таблицу, но возвращаем ответ по АПИ
+
+<table border="1" style="border-collapse: collapse; width: 80.5243%; height: 144px;">
 <tbody>
 <tr style="height: 18px;">
 <td style="width: 25.1704%; height: 18px; text-align: center;"><strong>Значение параметра в API</strong></td>
@@ -1059,14 +1089,17 @@ where  l.logins = <'logins.user_login из запроса'>
 <tr style="height: 18px;">
 <td style="width: 25.1704%; height: 18px;">-</td>
 <td style="width: 23.7363%; height: 18px;">
-<p><span>=</span>acc_accounts.<span>tid</span></p>
-<p><span>по значению параметра {tenantCode} определить ИД тенанта</span></p>
+=acc_account_tokens.tid по значению параметра {tenantCode} определить ИД тенанта
+select t.id from acc_tenants t where t.code={tenantCode}</span></p>
 </td>
 <td style="width: 50.9998%; height: 18px;">ИД тенанта</td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 25.1704%; height: 18px;"><span>clientId (path параметр)</span></td>
-<td style="width: 23.7363%; height: 18px;"><span>=</span>acc_accounts.<span>client_id</span></td>
+<td style="width: 25.1704%; height: 18px;"><span>-</span></td>
+<td style="width: 23.7363%; height: 18px;">
+=acc_accounts.client_id по значению параметра {clientId } определить client_id клиента
+select c.client_id from acc_clients c where c.id={clientId }
+</td>
 <td style="width: 50.9998%; height: 18px;">Код клиента</td>
 </tr>
 <tr style="height: 18px;">
@@ -1095,6 +1128,7 @@ where  l.logins = <'logins.user_login из запроса'>
 </tr>
 </tbody>
 </table>
+
 --- acc_account_logins
 <table border="1" style="border-collapse: collapse; width: 99.9065%; height: 334px;">
 <tbody>
@@ -1116,7 +1150,7 @@ where  l.logins = <'logins.user_login из запроса'>
 <tr style="height: 18px;">
 <td style="width: 25.1704%; height: 18px;">-</td>
 <td style="height: 18px;">
-<p>=acc_account_logins.tid&nbsp;по значению параметра {tenantCode} определить ИД в таблице&nbsp;acc_tenants</p>
+<p>=acc_account_logins.tid по значению параметра {tenantCode} определить ИД тенанта select t.id from acc_tenants t where t.code={tenantCode}
 </td>
 <td style="width: 50.2734%; height: 18px;">ИД тенанта&nbsp;</td>
 </tr>
@@ -1126,8 +1160,14 @@ where  l.logins = <'logins.user_login из запроса'>
 <td style="width: 50.2734%; height: 18px;"><span>Логин УЗ</span></td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 25.1704%; height: 18px;"><span>clientId (path параметр)</span></td>
-<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.client_id взять из&nbsp;clientId (path параметр)</span></td>
+<td style="width: 25.1704%; height: 18px;"><span>-</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.client_id по значению параметра {clientId } определить client_id клиента
+select c.client_id from acc_clients c where c.id={clientId}</span></td>
+<td style="width: 50.2734%; height: 18px;">Код клиента</td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>{clientId}</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_account_logins.aid</span></td>
 <td style="width: 50.2734%; height: 18px;">ИД клиента</td>
 </tr>
 <tr style="height: 18px;">
@@ -1149,6 +1189,7 @@ where  l.logins = <'logins.user_login из запроса'>
 </tr>
 </tbody>
 </table>
+
 ---acc_account_tokens
 <table border="1" style="border-collapse: collapse; width: 99.9065%; height: 825px;">
 <tbody>
@@ -1178,8 +1219,8 @@ where  l.logins = <'logins.user_login из запроса'>
 <td style="width: 50.2734%;"><span>Токен </span></td>
 </tr>
 <tr>
-<td style="width: 25.1704%;"><span>{clientId}</span></td>
-<td style="width: 24.4627%;"><span>=acc_account_tokens.client_id</span></td>
+<td style="width: 25.1704%;"><span>-</span></td>
+<td style="width: 24.4627%;"><span>=acc_account_tokens.client_id по значению параметра {clientId } определить client_id клиента select c.client_id from acc_clients c where c.id={clientId}</span></td>
 <td style="width: 50.2734%;"><span>Код клиента</span></td>
 </tr>
 <tr>
@@ -1194,7 +1235,9 @@ where  l.logins = <'logins.user_login из запроса'>
 </tr>
 </tbody>
 </table>
---- acc_product_roles
+
+
+--- acc_products_roles
 <table border="1" style="border-collapse: collapse; width: 80.5243%; height: 324px;">
 <tbody>
 <tr style="height: 18px;">
@@ -1214,7 +1257,7 @@ where  l.logins = <'logins.user_login из запроса'>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25.1704%; height: 18px;">id</td>
-<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles.id</td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles.<span>role_account_id</span></td>
 <td style="width: 50.2734%; height: 18px;"><span>ИД Аккаунта. (Внешний ключ для связи с таблицей acc_accounts.id)</span></td>
 </tr>
 <tr style="height: 18px;">
