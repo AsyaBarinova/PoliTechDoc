@@ -839,7 +839,6 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <li><span>GROUP</span></li>
 <li><span>ACCOUNT&nbsp;</span></li>
 <li><span>SUB</span></li>
-<li><span>products</span></li>
 </ul>
 </td>
 </tr>
