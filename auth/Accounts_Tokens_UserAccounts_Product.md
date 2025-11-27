@@ -739,7 +739,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 25%; height: 18px;"><span>products.canPrintform</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на получение ПФ. Если НЕ пришло, то false</span></td>
+<td style="width: 50%; height: 18px;"><span></span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
@@ -932,8 +932,8 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canPrintform</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на получение ПФ. Если НЕ пришло, то false</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на получение ПФ</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
@@ -1244,20 +1244,26 @@ select c.client_id from acc_clients c where c.id={clientId}</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>acc_account_tokens.is_deleted</span></td>
 <td style="width: 50%; height: 18px;"><span>Фалг удаления токена</span></td>
 </tr>
-    
 <tr>
 <td style="width: 25.1704%;"><span>-</span></td>
 <td style="width: 24.4627%;"><span>=acc_account_tokens.client_id по значению параметра {clientId } определить client_id клиента select c.client_id from acc_clients c where c.id={clientId}</span></td>
 <td style="width: 50.2734%;"><span>Код клиента</span></td>
 </tr>
-<tr style="height: 18px;">
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
-<td style="width: 50%; height: 18px;"><span>Разрешение на получение ПФ. Если НЕ пришло, то false</span></td>
-</tr>
 <td style="width: 24.4627%;"><span>=acc_account_tokens.aid</span></td>
-<td style="width: 50.2734%;"><span>Внешний ключ для связи с таблицей acc_accounts.id</span></td>
 <td style="width: 24.4627%; height: 18px;"><span><span>=</span></span>acc_product_roles.<span>role_product_id</span></td>
 <td style="width: 50.2734%; height: 18px;"><span>ИД роли. (Внешний ключ для связи с таблицей products.id)</span></td>
+</tr>
+</tbody>
+</table>
+
+
+acc_product_roles
+<table border="1" style="border-collapse: collapse; width: 99.9065%; height: 825px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px; text-align: center;"><strong>Значение параметра в API</strong></td>
+<td style="width: 24.4627%; text-align: center; height: 18px;"><strong>Значение параметра в таблице</strong></td>
+<td style="width: 50.2734%; height: 18px; text-align: center;"><strong>Описание</strong></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25.1704%; height: 18px;">id</td>
@@ -1316,6 +1322,7 @@ select c.client_id from acc_clients c where c.id={clientId}</span></td>
 </tr>
 </tbody>
 </table>
+
 8. Вернуть ответ 
 
 
@@ -1330,3 +1337,299 @@ select c.client_id from acc_clients c where c.id={clientId}</span></td>
 ### Название сценария:  Обновление данных партнера (клиента)
 #### Триггер: Вызван метод /tnts/{tenantCode}/clients/{clientId}
 #### Сценарий :
+### Логика обновления данных
+#### Название метода: обновление прав аккаунта 
+
+```
+PATCH /tnts/{tenantCode}/clients/{clientId}/accounts/{accountId}
+```
+
+<p>Входные параметры&nbsp;</p>
+
+<p><span>path</span>:</p>
+<table border="1" style="border-collapse: collapse; width: 100%; height: 216px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px; text-align: center;"><strong>Значение параметра</strong></td>
+<td style="width: 12.5%; text-align: center;"><strong>Тип</strong></td>
+<td style="width: 12.5%; text-align: center;"><strong>Обязательность</strong></td>
+<td style="width: 50%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>tenantCode</span></td>
+<td style="width: 12.5%;"><span>string</span><span>&nbsp;</span></td>
+<td style="width: 12.5%; text-align: center;"><span>Да</span></td>
+<td style="width: 50%; height: 18px;">
+<p>Код тенанта</p>
+<p></p>
+</td>
+</tr>
+<tr>
+<td style="width: 25%;"><span>clientId</span><span>&nbsp;</span><span><br /></span></td>
+<td style="width: 12.5%;"><span>string&nbsp;</span></td>
+<td style="width: 12.5%; text-align: center;"><span>Да</span></td>
+<td style="width: 50%;">
+<p>ИД клиента (партнера)</p>
+</td>
+</tr>
+<tr>
+<td style="width: 25%;">accountId<span><br /></span></td>
+<td style="width: 12.5%;"><span>string</span></td>
+<td style="width: 12.5%; text-align: center;"><span>Да</span></td>
+<td style="width: 50%;">
+<p><span>ИД аккаунта</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+
+body:
+<table border="1" style="border-collapse: collapse; width: 100%; height: 180px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px; text-align: center;"><strong>Значение параметра</strong></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><strong>Тип</strong></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><strong>Обязательность</strong></td>
+<td style="width: 42.1569%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">products</td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Продуктовые роли</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.isDeleted</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Флаг отключения продукта </span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canRead</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на чтение &nbsp;</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canPrintform</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на получение ПФ.&nbsp;</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на пред. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canPolicy</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на итог. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canAddendum</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canCancel</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на аннулирование договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canProlongate</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на пролонгацию договора</span></td>
+</tr>
+</tbody>
+</table>
+
+Пример запроса:
+<pre> {
+  "products": [
+    {
+      "isDeleted": true,
+      "canRead": true,
+      "canPrintform": true,
+      "canQuote": true,
+      "canPolicy": true,
+      "canAddendum": true,
+      "canCancel": false,
+      "canProlongate": false
+    }
+  ]
+}
+    </pre> 
+
+
+Выходные параметры: 
+
+body:
+<table border="1" style="border-collapse: collapse; width: 100%; height: 180px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px; text-align: center;"><strong>Значение параметра</strong></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><strong>Тип</strong></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><strong>Обязательность</strong></td>
+<td style="width: 42.1569%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">products</td>
+<td style="width: 12.5%; height: 18px;"><span>массив</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Продуктовые роли</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.isDeleted</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Флаг отключения продукта </span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canRead</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на чтение &nbsp;</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canPrintform</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на получение ПФ.&nbsp;</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на пред. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canPolicy</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на итог. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canAddendum</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canCancel</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на аннулирование договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>products.canProlongate</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на пролонгацию договора</span></td>
+</tr>
+</tbody>
+</table>
+
+Пример ответа:
+<pre> {
+  "products": [
+    {
+      "isDeleted": true,
+      "canRead": true,
+      "canPrintform": true,
+      "canQuote": true,
+      "canPolicy": true,
+      "canAddendum": true,
+      "canCancel": false,
+      "canProlongate": false
+    }
+  ]
+}
+    </pre> 
+
+### Название сценария:  Обновление данных партнера (клиента)
+#### Триггер: Вызван метод PATCH /tnts/{tenantCode}/clients/{clientId}/accounts/{accountId}/products/{productId}
+#### Сценарий :
+<p>1. Проверить наличие  связи между тенантом, клиентом, аккаунтом и продуктом:
+
+~~~
+SELECT
+    pr.tid,                  --- ид тенанта
+    t.code,                  ---- код тенанта
+    pr.role_account_id,      --- ид аккаунта
+    pr.role_products_id      --- подкл. продукт
+FROM
+    acc_products_roles pr
+JOIN
+    acc_tenants t ON t.id = pr.tid
+WHERE
+    t.code = '{tenantCode}'
+    AND pr.role_account_id = '{accountId}'      
+    AND pr.role_products_id = '{productId}'
+~~~
+Если запись найдена, то перейти на шаг 2, иначе исключение 2а.</p>
+
+<p>2. Обновить данные для найденного аккаунта, клиента и продукта в таблице  acc_products_roles
+
+<table border="1" style="border-collapse: collapse; width: 99.9065%; height: 825px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px; text-align: center;"><strong>Значение параметра в API</strong></td>
+<td style="width: 24.4627%; text-align: center; height: 18px;"><strong>Значение параметра в таблице</strong></td>
+<td style="width: 50.2734%; height: 18px; text-align: center;"><strong>Описание</strong></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canPrintform</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles.<span>can_printform</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на получение ПФ</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canRead</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles.<span>can_read</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на чтение &nbsp;</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canPolicy</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_policy</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на пред. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canQuote</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_quote</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на итог. расчет</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canAddendum</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_addendum</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на создание&nbsp; доп.соглашение</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canCancel</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_cancel</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на аннулирование договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.canProlongate</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=</span>acc_product_roles<span>.can_prolongate</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Разрешение на пролонгацию договора</span></td>
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25.1704%; height: 18px;"><span>products.isDeleted</span></td>
+<td style="width: 24.4627%; height: 18px;"><span>=acc_product_roles.is_deleted&nbsp;</span></td>
+<td style="width: 50.2734%; height: 18px;"><span>Флаг удаления</span></td>
+</tr>
+<tr style="height: 36px;">
+<td style="width: 25.1704%; height: 36px;"><span>-</span></td>
+<td style="width: 24.4627%; height: 36px;"><span>=acc_product_roles.updated_at уст. тек. дату</span></td>
+<td style="width: 50.2734%; height: 36px;"><span>Дата/время обновления&nbsp;</span></td>
+</tr>
+</tbody>
+</table>
+<p>3. Вернуть ответ 
+
+Исключение:
