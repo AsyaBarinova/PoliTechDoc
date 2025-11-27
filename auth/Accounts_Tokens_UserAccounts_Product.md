@@ -431,6 +431,14 @@ CREATE TABLE IF NOT EXISTS acc_products_roles (
 <td style="text-align: center; width: 161.568px; height: 18px;">3</td>
 <td style="text-align: center; width: 113.977px; height: 18px;">Внешний ключ для связи с таблицей acc_accounts.id</td>
 </tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 80.125px;">is_deleted</td>
+<td style="text-align: center; height: 36px; width: 44.2273px;">-</td>
+<td style="text-align: center; height: 36px; width: 107.489px;">BOOLEAN</td>
+<td style="text-align: center; height: 36px; width: 129.25px;">Да</td>
+<td style="text-align: center; width: 161.568px; height: 36px;">1</td>
+<td style="text-align: center; height: 36px; width: 113.977px;">Флаг удаления. true - да, false-нет</td>
+</tr>
 <tr style="height: 72px;">
 <td style="text-align: center; height: 80px; width: 80.125px;">created_at</td>
 <td style="text-align: center; height: 80px; width: 44.2273px;">-</td>
@@ -458,6 +466,7 @@ CREATE TABLE IF NOT EXISTS acc_account_tokens (
     token VARCHAR(255) NOT NULL,
     client_id VARCHAR(255) NOT NULL REFERENCES acc_clients(clients_id),
     aid BIGINT NOT NULL REFERENCES acc_accounts(id),
+    is_deleted BOOLEAN NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (token, client_id)
@@ -696,6 +705,12 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 50%; height: 18px;"><span>Токен</span></td>
 </tr>
 <tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>tokens.isDeleted</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Фалг удаления. Если НЕ пришло, то false </span></td>
+</tr>
+<tr style="height: 18px;">
 <td style="width: 25%; height: 18px;">products</td>
 <td style="width: 12.5%; height: 18px;"><span>массив</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
@@ -774,7 +789,8 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
   ],
   "tokens": [
     {
-      "token": "SR"
+      "token": "SR",
+      "isDeleted": false
     }
   ],
   "products": [
@@ -883,6 +899,12 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
 <td style="width: 50%; height: 18px;"><span>Токен</span></td>
 </tr>
+    <tr style="height: 18px;">
+<td style="width: 25%; height: 18px;"><span>tokens.isDeleted</span></td>
+<td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Фалг удаления. Если НЕ пришло, то false </span></td>
+</tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;">products</td>
 <td style="width: 12.5%; height: 18px;"><span>массив</span></td>
@@ -959,7 +981,8 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
   ],
   "tokens": [
     {
-      "token": "SR"
+      "token": "SR",
+       "isDeleted": false
     }
   ],
   "products": [
@@ -1217,40 +1240,22 @@ select c.client_id from acc_clients c where c.id={clientId}</span></td>
 <td style="width: 24.4627%;"><span>=acc_account_tokens.token</span></td>
 <td style="width: 50.2734%;"><span>Токен </span></td>
 </tr>
+<td style="width: 25%; height: 18px;"><span>tokens.isDeleted</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>acc_account_tokens.is_deleted</span></td>
+<td style="width: 50%; height: 18px;"><span>Фалг удаления токена</span></td>
+</tr>
+    
 <tr>
 <td style="width: 25.1704%;"><span>-</span></td>
 <td style="width: 24.4627%;"><span>=acc_account_tokens.client_id по значению параметра {clientId } определить client_id клиента select c.client_id from acc_clients c where c.id={clientId}</span></td>
 <td style="width: 50.2734%;"><span>Код клиента</span></td>
 </tr>
-<tr>
-<td style="width: 25.1704%;">id</td>
+<tr style="height: 18px;">
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на получение ПФ. Если НЕ пришло, то false</span></td>
+</tr>
 <td style="width: 24.4627%;"><span>=acc_account_tokens.aid</span></td>
 <td style="width: 50.2734%;"><span>Внешний ключ для связи с таблицей acc_accounts.id</span></td>
-</tr>
-<tr>
-<td style="width: 25.1704%;">-</td>
-<td style="width: 24.4627%;"><span>=acc_account_tokens.created_at</span></td>
-<td style="width: 50.2734%;"><span>Дата/время создания токена</span></td>
-</tr>
-</tbody>
-</table>
-
-
---- acc_products_roles
-<table border="1" style="border-collapse: collapse; width: 80.5243%; height: 324px;">
-<tbody>
-<tr style="height: 18px;">
-<td style="width: 25.1704%; height: 18px; text-align: center;"><strong>Значение параметра в API</strong></td>
-<td style="width: 24.4627%; text-align: center; height: 18px;"><strong>Значение параметра в таблице</strong></td>
-<td style="width: 50.2734%; height: 18px; text-align: center;"><strong>Описание</strong></td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 25.1704%; height: 18px;">products</td>
-<td style="width: 24.4627%; height: 18px;"><span>массив</span></td>
-<td style="width: 50.2734%; height: 18px;"><span>Продуктовые роли</span></td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 25.1704%; height: 18px;">products.roleProductId</td>
 <td style="width: 24.4627%; height: 18px;"><span><span>=</span></span>acc_product_roles.<span>role_product_id</span></td>
 <td style="width: 50.2734%; height: 18px;"><span>ИД роли. (Внешний ключ для связи с таблицей products.id)</span></td>
 </tr>
