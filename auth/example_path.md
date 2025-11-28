@@ -90,6 +90,90 @@ VALUES ('2', '1', 'СРАВНИ', 'SRAVNI', 'false', '2025-11-20T15:30:00Z');
 <p></p>
 <p></p>
 
+### Добавить пользователя (УЗ)
+Шаг 3.
+##### Вводная
+<p>Учетная запись пользователя содержит следующие данные: логин (электронная почта), пароль, ФИО и должность пользователя, имеющего доступ в систему.</p>
+<p>УЗ заводятся в рамках тенанта. При этом одна УЗ может быть привязана к нескольким разным портфелям (account), связь обеспечивает таблица acc_accounts_logins. Для хранения информации об учетных записях используется таблица acc_logins.</p>
+
+###### Создание УЗ
+##### Описание шага:
+Для создания новой УЗ и привязки тенанту, необходимо добавить соответствующую запись в таблицу acc_logins следующими способами:
+
+Выполнить прямой SQL-запрос INSERT в таблицу acc_logins
+```
+INSERT INTO acc_logins (id, tid, user_login, full_name, position, is_deleted, created_at)
+VALUES ('2', '1', 'olga.p1@gmail.com', 'Пивоварова Ольга Васильевна', 'Страховой агент', 'false', '2025-11-20T15:30:00Z');
+```
+ИЛИ 
+
+Использовать метод POST /tnts/{tenantId}/logins (см. описание метода https://github.com/ratner28/PoliTechDoc/blob/patch-2/auth/acc_logins.md)
+
+<p>Пример записи в таблице:</p> 
+<table border="1" style="border-collapse: collapse; width: 100%; height: 72px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">id</td>
+<td style="width: 25%; height: 18px;">tid</td>
+<td style="width: 25%; height: 18px;">user_login</td>
+<td style="width: 25%; height: 18px;">password</td>
+<td style="width: 25%; height: 18px;">full_name</td>
+<td style="width: 12.5%; height: 18px;">position</td>
+<td style="width: 12.5%;">is_deleted</td>
+<td style="width: 12.5%;">created_at</td>  
+<td style="width: 12.5%;">updated_at</td>    
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">2</td>
+<td style="width: 25%; height: 18px;">1</td>
+<td style="width: 25%; height: 18px;">olga.p1@gmail.com</td>
+<td style="width: 12.5%; height: 18px;">null</td>
+<td style="width: 12.5%; height: 18px;">Пивоварова Ольга Васильевна</td>
+<td style="width: 12.5%;">Страховой агент</td>
+<td style="width: 12.5%;">false</td>  
+<td style="width: 12.5%;">2025-11-20T15:30:00Z</td>  
+<td style="width: 12.5%;">NULL</td>    
+</tr>
+</tbody>
+</table>
+<p></p>
+<p></p>
+
+###### Добавление (изменение) пароля для УЗ
+Для добавления пароля для УЗ необходимо использовать метод POST /api/auth/set-password (см. описание метода https://github.com/ratner28/PoliTechDoc/blob/patch-2/auth/acc_logins.md). Чтобы создать/поменять пароль у пользователя должна быть назначена роль SYS_ADMIN.
+После вызова метода пароль хешируется, и его хеш-сумма сохраняется в таблице.
+
+<p>Пример записи в таблице:</p> 
+<table border="1" style="border-collapse: collapse; width: 100%; height: 72px;">
+<tbody>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">id</td>
+<td style="width: 25%; height: 18px;">tid</td>
+<td style="width: 25%; height: 18px;">user_login</td>
+<td style="width: 25%; height: 18px;">password</td>
+<td style="width: 25%; height: 18px;">full_name</td>
+<td style="width: 12.5%; height: 18px;">position</td>
+<td style="width: 12.5%;">is_deleted</td>
+<td style="width: 12.5%;">created_at</td>  
+<td style="width: 12.5%;">updated_at</td>    
+</tr>
+<tr style="height: 18px;">
+<td style="width: 25%; height: 18px;">2</td>
+<td style="width: 25%; height: 18px;">1</td>
+<td style="width: 25%; height: 18px;">olga.p1@gmail.com</td>
+<td style="width: 12.5%; height: 18px;">3fd90706aa13b38f74ba8e0ca16cd598</td>
+<td style="width: 12.5%; height: 18px;">Пивоварова Ольга Васильевна</td>
+<td style="width: 12.5%;">Страховой агент</td>
+<td style="width: 12.5%;">false</td>  
+<td style="width: 12.5%;">2025-11-20T15:30:00Z</td>  
+<td style="width: 12.5%;">2025-11-21T15:30:00Z</td>    
+</tr>
+</tbody>
+</table>
+<p></p>
+<p></p>
+
+
 ### Добавить аккаунт, роли для уз, токен 
 Шаг 4.
 ##### Вводная
@@ -126,7 +210,7 @@ VALUES ('2', '1', 'СРАВНИ', 'SRAVNI', 'false', '2025-11-20T15:30:00Z');
 
 ##### Описание шага:
 
-После создания пользователей можем им назначать права. Важно - работа пользователя ведется от определнного аккаунта, поэтому когда наделяются УЗ правами создается, то создается аккаунт с опред. привелегиями 
+После создания пользователей можем им назначать права. Важно - работа пользователя ведется от определнного аккаунта, поэтому когда наделяются УЗ правами , то создается аккаунт с опред. привелегиями и к созданным уз назначаются роли в разрезе продукта.
 В качестве примера мы создадим аккаунт, логин, уз, токен для клиента "СРАВНИ". Добавление записи можно осуществить следующими способами:
 
 1. Выполнить прямой SQL-запрос INSERT в таблицу acc_accounts, acc_products_roles, acc_account_logins (если при заведении известен/требуется токен, то acc_account_tokens)
@@ -356,20 +440,72 @@ acc_account_tokens токен
 </tbody>
 </table>
 
+acc_account_logins привязка пользователя к аккаунту
 
-ИЛИ 
+<table style="height: 295px; width: 354px;">
+<thead>
+<tr style="height: 36px;">
+<th style="text-align: center; height: 36px; width: 80.1591px;">Название поля</th>
+<th style="text-align: center; width: 110.057px; height: 36px;">Пример</th>
+<th style="text-align: center; height: 36px; width: 146.148px;">Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 35px; width: 80.1591px;">id</td>
+<td style="text-align: center; width: 110.057px; height: 35px;">5</td>
+<td style="text-align: center; height: 35px; width: 146.148px;">Идентификатор записи</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 80.1591px;">tid</td>
+<td style="text-align: center; width: 110.057px; height: 36px;">1</td>
+<td style="text-align: center; height: 36px; width: 146.148px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 80.1591px; height: 18px;">user_login</td>
+<td style="text-align: center; width: 110.057px; height: 18px;"><span>olga.p1@gmail.com</span></td>
+<td style="text-align: center; width: 146.148px; height: 18px;">Логин пользователя</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 80.1591px; height: 18px;">client_id</td>
+<td style="text-align: center; width: 110.057px; height: 18px;">SRAVNI</td>
+<td style="text-align: center; width: 146.148px; height: 18px;">Внешний ключ для связи с таблицей acc_clients.client_id&nbsp;</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 80.1591px; height: 18px;">is_default</td>
+<td style="text-align: center; width: 110.057px; height: 18px;">true</td>
+<td style="text-align: center; width: 146.148px; height: 18px;">
+<p>Дефолтный портефль&nbsp;</p>
+<p>true - да, false - нет</p>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 80.1591px; height: 18px;">aid</td>
+<td style="text-align: center; width: 110.057px; height: 18px;">3</td>
+<td style="text-align: center; width: 146.148px; height: 18px;">Внешний ключ для связи с таблицей acc_account.id&nbsp;</td>
+</tr>
+<tr style="height: 72px;">
+<td style="text-align: center; height: 80px; width: 80.1591px;">created_at</td>
+<td style="text-align: center; width: 110.057px; height: 80px;">2025-11-20T15:30:00Z</td>
+<td style="text-align: center; height: 80px; width: 146.148px;">Дата/время создания</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 80.1591px;">user_role</td>
+<td style="text-align: center; width: 110.057px; height: 36px;">SALES</td>
+<td style="text-align: center; height: 36px; width: 146.148px;">Роль пользователя</td>
+</tr>
+</tbody>
+</table>
+
+<td> ИЛИ </td>
+
 Использовать метод REST API: POST /tnts/{tenantCode}/clients/{clientId}/accounts
-Важно: ДО выполнения запроса должен быть создан подключаемый продукт в таблице pt_products И логин(ы) пользователя в таблице account_loginsс. 
+<td>Важно: ДО выполнения запроса должен быть создан подключаемый продукт в таблице pt_products И логин(ы) пользователя в таблице account_loginsс.</td> 
 
 ##### Дополнительный УЗ к созданному аккаунту 
-Если ребуется создатьб новые УЗ к аккаунту, то также ипользуем метод POST /tnts/{tenantCode}/clients/{clientId}/accounts
-Исключение создание токена. 
+<td>Если требуется создать новые УЗ к аккаунту, то также ипользуем метод POST /tnts/{tenantCode}/clients/{clientId}/accounts</td> 
 
-Для создания токена к подкл. аккаунту и использовать метод  POST: /tnts/{tenantCode}/clients/{clientId}/accounts/{accountId}
-
-
-
-
+##### Дополнительный токен к созданному аккаунту 
 
 
 
