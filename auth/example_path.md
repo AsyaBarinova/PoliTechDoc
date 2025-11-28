@@ -90,8 +90,8 @@ VALUES ('2', '1', 'СРАВНИ', 'SRAVNI', 'false', '2025-11-20T15:30:00Z');
 <p></p>
 <p></p>
 
-### Добавить аккаунт 
-Шаг 3.
+### Добавить аккаунт, роли для уз, токен 
+Шаг 4.
 ##### Вводная
 <p>Аккаунт (аccount) &mdash; это "виртуальный субъект", от имени которого работают пользователи. К одному account может быть привязано несколько логинов (учётных записей людей).</p>
 <p>Это даёт следующие преимущества:</p>
@@ -121,5 +121,255 @@ VALUES ('2', '1', 'СРАВНИ', 'SRAVNI', 'false', '2025-11-20T15:30:00Z');
 </ul>
 Для хранения списка аакунтов будет использоваться таблица acc_accounts
 
+Токен — это дополнительный идентификатор, доступа к портфелю. Иногда продажи проводятся на публичных сайтах, но есть потребность привязать продажи к разным портфелям. Тогда можно сгенерить разные токены, раздать их продавцам, чтобы они вводили их при продаже и настроить этот код на определенный портфель. Например, при создании акции можно записать токен тем самым и разделить портфель продаж. 
+Для хранения списка аакунтов будет использоваться таблица acc_account_tokens
+
 ##### Описание шага:
+
+После создания пользователей можем им назначать права. Важно - работа пользователя ведется от определнного аккаунта, поэтому когда наделяются УЗ правами создается, то создается аккаунт с опред. привелегиями 
+В качестве примера мы создадим аккаунт, логин, уз, токен для клиента "СРАВНИ". Добавление записи можно осуществить следующими способами:
+
+1. Выполнить прямой SQL-запрос INSERT в таблицу acc_accounts, acc_products_roles, acc_account_logins (если при заведении известен/требуется токен, то acc_account_tokens)
+
+acc_accounts аккаунт 
+<table style="height: 313px; width: 351px;">
+<thead>
+<tr style="height: 36px;">
+<th style="text-align: center; height: 36px; width: 101.727px;">Название поля</th>
+<th style="text-align: center; width: 102.136px; height: 36px;">Пример</th>
+<th style="text-align: center; height: 36px; width: 148.42px;">Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 35px; width: 101.727px;">id</td>
+<td style="text-align: center; width: 102.136px; height: 35px;">3</td>
+<td style="text-align: center; height: 35px; width: 148.42px;">Идентификатор записи</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 101.727px;">tid</td>
+<td style="text-align: center; width: 102.136px; height: 36px;">1</td>
+<td style="text-align: center; height: 36px; width: 148.42px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 101.727px; height: 18px;">client_id</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">SRAVNI</td>
+<td style="text-align: center; width: 148.42px; height: 18px;">Внешний ключ для связи с таблицей acc_clients.clients_id</td>
+</tr>
+<tr style="height: 72px;">
+<td style="text-align: center; height: 80px; width: 101.727px;">parent_id</td>
+<td style="text-align: center; width: 102.136px; height: 80px;"><span>3</span></td>
+<td style="text-align: center; height: 80px; width: 148.42px;">Родитель acc_accounts.id</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 101.727px;">accounts_type</td>
+<td style="text-align: center; width: 102.136px; height: 36px;"><span>ACCOUNT</span></td>
+<td style="text-align: center; height: 36px; width: 148.42px;">
+<p>Тип узла</p>
+<p></p>
+</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 101.727px; height: 18px;">name</td>
+<td style="text-align: center; width: 102.136px; height: 18px;"><span>Аккаунт для продаж СРАВНИ</span></td>
+<td style="text-align: center; width: 148.42px; height: 18px;">Наименование</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 101.727px; height: 18px;">created_at</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">2025-11-20T15:30:00Z</td>
+<td style="text-align: center; width: 148.42px; height: 18px;">Дата / время созадния</td>
+</tr>
+</tbody>
+</table>
+ 
+acc_products_roles роли 
+<table style="height: 419px; width: 375px;">
+<thead>
+<tr style="height: 36px;">
+<th style="text-align: center; height: 36px; width: 117.909px;">Название поля</th>
+<th style="text-align: center; width: 102.136px; height: 36px;">Пример</th>
+<th style="text-align: center; height: 36px; width: 156.352px;">Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 35px; width: 117.909px;">id</td>
+<td style="text-align: center; width: 102.136px; height: 35px;">4</td>
+<td style="text-align: center; height: 35px; width: 156.352px;">Идентификатор записи</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 117.909px;">tid</td>
+<td style="text-align: center; width: 102.136px; height: 36px;">1</td>
+<td style="text-align: center; height: 36px; width: 156.352px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
+</tr>
+<tr style="height: 72px;">
+<td style="text-align: center; height: 80px; width: 117.909px;">role_products_id</td>
+<td style="text-align: center; width: 102.136px; height: 80px;">5</td>
+<td style="text-align: center; height: 80px; width: 156.352px;">Внешний ключ для связи с таблицей products.id</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 117.909px;">role_account_id</td>
+<td style="text-align: center; width: 102.136px; height: 36px;">3</td>
+<td style="text-align: center; height: 36px; width: 156.352px;">Внешний ключ для связи с таблицей acc_accounts.id</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 117.909px; height: 18px;">is_deleted</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">false</td>
+<td style="text-align: center; width: 156.352px; height: 18px;">Флаг удаления. True - неактивный(удален), false - активынй</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 117.909px; height: 18px;">can_read</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">true</td>
+<td style="text-align: center; width: 156.352px; height: 18px;">Разрешение на чтение &nbsp;</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 117.909px; height: 18px;">can_printform</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">true</td>
+<td style="text-align: center; width: 156.352px; height: 18px;">Разрешение на получение ПФ &nbsp;</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 117.909px;">can_quote</td>
+<td style="text-align: center; width: 102.136px; height: 36px;">true</td>
+<td style="text-align: center; height: 36px; width: 156.352px;">Разрешение на пред. расчет</td>
+</tr>
+<tr style="height: 17px;">
+<td style="text-align: center; width: 117.909px; height: 17px;">can_policy</td>
+<td style="text-align: center; width: 102.136px; height: 17px;">true</td>
+<td style="text-align: center; width: 156.352px; height: 17px;">Разрешение на итог. расчет</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 117.909px; height: 18px;">can_addendum</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">false</td>
+<td style="text-align: center; width: 156.352px; height: 18px;">Разрешение на создание&nbsp; доп.соглашен</td>
+</tr>
+<tr style="height: 17px;">
+<td style="text-align: center; width: 117.909px; height: 17px;">can_cancel</td>
+<td style="text-align: center; width: 102.136px; height: 17px;">true</td>
+<td style="text-align: center; width: 156.352px; height: 17px;">Разрешение на аннулирование договора</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 117.909px; height: 18px;">can_prolongate</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">false</td>
+<td style="text-align: center; width: 156.352px; height: 18px;">Разрешение на пролонгацию договора</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 117.909px; height: 18px;">created_at</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">2025-11-20T15:30:00Z</td>
+<td style="text-align: center; width: 156.352px; height: 18px;">Дата/время создания&nbsp;</td>
+</tr>
+</tbody>
+</table>
+
+pt_products подключаемый продукт 
+ <table style="height: 331px; width: 330px;">
+<thead>
+<tr style="height: 36px;">
+<th style="text-align: center; height: 36px; width: 118.045px;">Название поля</th>
+<th style="text-align: center; width: 93.5909px; height: 36px;">Пример</th>
+<th style="text-align: center; height: 36px; width: 113.977px;">Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 35px; width: 118.045px;">id</td>
+<td style="text-align: center; width: 93.5909px; height: 35px;">5</td>
+<td style="text-align: center; height: 35px; width: 113.977px;">Идентификатор продукта</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 118.045px;">tid</td>
+<td style="text-align: center; width: 93.5909px; height: 36px;">1</td>
+<td style="text-align: center; height: 36px; width: 113.977px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
+</tr>
+<tr style="height: 72px;">
+<td style="text-align: center; height: 80px; width: 118.045px;">code</td>
+<td style="text-align: center; width: 93.5909px; height: 80px;"><span>Accident </span></td>
+<td style="text-align: center; height: 80px; width: 113.977px;">Код продукта</td>
+</tr>
+<tr style="height: 72px;">
+<td style="text-align: center; width: 118.045px; height: 72px;">name</td>
+<td style="text-align: center; width: 93.5909px; height: 72px;">Страхование от несчастных случаев (НС)</td>
+<td style="text-align: center; width: 113.977px; height: 72px;">Наименование продукта</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 118.045px; height: 18px;">lob</td>
+<td style="text-align: center; width: 93.5909px; height: 18px;">Страхование жизни</td>
+<td style="text-align: center; width: 113.977px; height: 18px;">Линия бизнеса</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 118.045px; height: 18px;">prod_version_no</td>
+<td style="text-align: center; width: 93.5909px; height: 18px;">1</td>
+<td style="text-align: center; width: 113.977px; height: 18px;">Версия продукта прод</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 118.045px; height: 18px;">dev_version_no</td>
+<td style="text-align: center; width: 93.5909px; height: 18px;">1</td>
+<td style="text-align: center; width: 113.977px; height: 18px;">Версия продукта dev</td>
+</tr>
+</tbody>
+</table>
+
+acc_account_tokens токен
+<table style="height: 277px; width: 330px;">
+<thead>
+<tr style="height: 36px;">
+<th style="text-align: center; height: 36px; width: 77.6023px;">Название поля</th>
+<th style="text-align: center; width: 102.136px; height: 36px;">Пример</th>
+<th style="text-align: center; height: 36px; width: 148.42px;">Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 35px; width: 77.6023px;">id</td>
+<td style="text-align: center; width: 102.136px; height: 35px;">4</td>
+<td style="text-align: center; height: 35px; width: 148.42px;">Идентификатор записи</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 77.6023px;">tid</td>
+<td style="text-align: center; width: 102.136px; height: 36px;">1</td>
+<td style="text-align: center; height: 36px; width: 148.42px;">Внешний ключ для связи с таблицей acc_tenants.id</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 77.6023px; height: 18px;">token</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">PROMO</td>
+<td style="text-align: center; width: 148.42px; height: 18px;">Название токена</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 77.6023px; height: 18px;">client_id</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">SRAVNI</td>
+<td style="text-align: center; width: 148.42px; height: 18px;">Внешний ключ для связи с таблицей acc_clients.clients_id</td>
+</tr>
+<tr style="height: 18px;">
+<td style="text-align: center; width: 77.6023px; height: 18px;">aid</td>
+<td style="text-align: center; width: 102.136px; height: 18px;">3</td>
+<td style="text-align: center; width: 148.42px; height: 18px;">Внешний ключ для связи с таблицей acc_accounts.id</td>
+</tr>
+<tr style="height: 36px;">
+<td style="text-align: center; height: 36px; width: 77.6023px;">is_deleted</td>
+<td style="text-align: center; width: 102.136px; height: 36px;">false</td>
+<td style="text-align: center; height: 36px; width: 148.42px;">Флаг удаления. true - да, false-нет</td>
+</tr>
+<tr style="height: 72px;">
+<td style="text-align: center; height: 80px; width: 77.6023px;">created_at</td>
+<td style="text-align: center; width: 102.136px; height: 80px;">2025-11-20T15:30:00Z</td>
+<td style="text-align: center; height: 80px; width: 148.42px;">Дата/время создания</td>
+</tr>
+</tbody>
+</table>
+
+
+ИЛИ 
+Использовать метод REST API: POST /tnts/{tenantCode}/clients/{clientId}/accounts
+Важно: ДО выполнения запроса должен быть создан подключаемый продукт в таблице pt_products И логин(ы) пользователя в таблице account_loginsс. 
+
+##### Дополнительный УЗ к созданному аккаунту 
+Если ребуется создатьб новые УЗ к аккаунту, то также ипользуем метод POST /tnts/{tenantCode}/clients/{clientId}/accounts
+Исключение создание токена. 
+
+Для создания токена к подкл. аккаунту и использовать метод  POST: /tnts/{tenantCode}/clients/{clientId}/accounts/{accountId}
+
+
+
+
+
+
 
