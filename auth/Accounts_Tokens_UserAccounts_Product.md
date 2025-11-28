@@ -363,14 +363,6 @@ CREATE TABLE IF NOT EXISTS acc_products_roles (
 <td style="text-align: center; width: 102px; height: 18px;">1</td>
 <td style="text-align: center; width: 134px; height: 18px;">Версия продукта dev</td>
 </tr>
-<tr style="height: 18px;">
-<td style="text-align: center; width: 118px; height: 18px;">isDeleted</td>
-<td style="text-align: center; width: 44px; height: 18px;">-</td>
-<td style="text-align: center; width: 107px; height: 18px;">BOOLEAN</td>
-<td style="text-align: center; width: 129px; height: 18px;">Да</td>
-<td style="text-align: center; width: 102px; height: 18px;">false</td>
-<td style="text-align: center; width: 134px; height: 18px;">Флаг удаления. true - да, false - нет.</td>
-</tr>
 </tbody>
 </table>
 
@@ -739,7 +731,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <td style="width: 25%; height: 18px;"><span>products.canPrintform</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
 <td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
-<td style="width: 50%; height: 18px;"><span></span></td>
+<td style="width: 50%; height: 18px;"><span>Разрешение на получение ПФ.Если НЕ пришло, то false<</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
@@ -796,7 +788,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
   "products": [
     {
       "roleproductsId": "5",
-      "roleproductsId": "5",
+      "canPrintform": true,
       "canRead": true,
       "canPrintform": true,
       "canQuote": true,
@@ -920,7 +912,7 @@ POST /tnts/{tenantCode}/clients/{clientId}/accounts
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;">products.roleAccauntId</td>
 <td style="width: 12.5%; height: 18px;"><span>string</span></td>
-<td style="width: 12.5%; text-align: center; height: 18px;"><span>Да</span></td>
+<td style="width: 12.5%; text-align: center; height: 18px;"><span>Нет</span></td>
 <td style="width: 50%; height: 18px;"><span>ИД Аккаунта. (Внешний ключ для связи с таблицей acc_accounts.id)</span></td>
 </tr>
 <tr style="height: 18px;">
@@ -1414,7 +1406,7 @@ body:
 <td style="width: 25%; height: 18px;"><span>products.canPrintform</span></td>
 <td style="width: 12.5%; height: 18px;"><span>boolean</span></td>
 <td style="width: 20.3431%; text-align: center; height: 18px;"><span>Нет</span></td>
-<td style="width: 42.1569%; height: 18px;"><span>Разрешение на получение ПФ.&nbsp;</span></td>
+<td style="width: 42.1569%; height: 18px;"><span>Разрешение на получение ПФ</span></td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 25%; height: 18px;"><span>products.canQuote</span></td>
@@ -1632,4 +1624,5 @@ WHERE
 </table>
 <p>3. Вернуть ответ 
 
-Исключение:
+#### Исключение 
+<p>2а Сформировать сообщение об ошибке </p>
